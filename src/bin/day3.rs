@@ -8,31 +8,21 @@ fn main() {
 
     let tree = '#';
     let empty = '.';
-    let right_movement = 3;
-    let down_movement = 1;
     let lines = reader.lines().map(|line| line.unwrap()).collect::<Vec<String>>();
-    for right_movement in vec![1, 3, 5, 7] {
+    let mut results = vec![];
+    for pattern in vec![(1, 1), (1, 3), (1, 5), (1, 7), (2, 1)] {
         let mut position = (0, 0);
-        let result: usize = lines.clone().into_iter().map(|line| {
+        let result: usize = lines.clone().into_iter().step_by(pattern.0).map(|line| {
             let obstacle = line.chars().cycle().nth(position.1).unwrap();
-            position = (position.0 + down_movement, position.1 + right_movement);
+            position = (position.0 + pattern.0, position.1 + pattern.1);
             if obstacle == tree {
                 1
             } else {
                 0
             }
         }).sum();
+        results.push(result);
         println!("{}", result);
     }
-    let mut position = (0, 0);
-    let result: usize = lines.clone().into_iter().step_by(2).map(|line| {
-        let obstacle = line.chars().cycle().nth(position.1).unwrap();
-        position = (position.0 + 2, position.1 + 1);
-        if obstacle == tree {
-            1
-        } else {
-            0
-        }
-    }).sum();
-    println!("{}", result);
+    println!("{}", results.into_iter().fold(1, |product, value| product * value));
 }
