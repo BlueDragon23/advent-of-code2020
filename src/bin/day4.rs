@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
-use regex::Regex;
+use reformation::Reformation;
 
 #[derive(Clone, Debug, Default)]
 struct Passport {
@@ -13,6 +13,53 @@ struct Passport {
     ecl: Option<String>,
     pid: Option<String>,
     cid: Option<String>
+}
+
+#[derive(Reformation)]
+#[reformation(r"{year}")]
+struct BirthYear {
+    year: usize
+}
+
+#[derive(Reformation)]
+#[reformation(r"{year}")]
+struct IssueYear {
+    year: usize
+}
+
+#[derive(Reformation)]
+#[reformation(r"{year}")]
+struct ExpiryYear {
+    year: usize
+}
+
+#[derive(Reformation, Debug)]
+enum Height {
+    #[reformation(r"{}cm")]
+    Cm(i32),
+    #[reformation(r"{}in")]
+    In(i32),
+}
+
+#[derive(Reformation)]
+#[reformation(r"{colour}")]
+struct HairColour {
+    #[reformation(r"#([0-9]|[a-f]){6}")]
+    colour: String
+}
+
+#[derive(Reformation)]
+#[reformation(r"{colour}")]
+struct EyeColour {
+    #[reformation(r"(amb|blu|brn|gry|grn|hzl|oth)")]
+    colour: String
+}
+
+#[derive(Reformation)]
+#[reformation(r"{id}")]
+struct PID {
+    #[reformation(r"\d{9}")]
+    id: String
 }
 
 fn main() {
@@ -62,33 +109,21 @@ fn add_fields(line: String, old_result: Passport) -> Passport {
 }
 
 fn valid_fields(passport: &Passport) -> bool {
-    let hair_regex = Regex::new(r"^#([0-9]|[a-f]){6}$").unwrap();
-    let eye_colours = vec!["amb", "blu", "brn", "gry", "grn", "hzl", "oth"];
-    let pid_regex = Regex::new(r"^([0-9]){9}$").unwrap();
-    passport.byr.is_some() && 
-        passport.byr.clone().map_or(false, |byr_str| 
-            byr_str.len() == 4 && byr_str.parse::<usize>().map(|byr| byr >= 1920 && byr <= 2002).unwrap_or(false)) &&
-    passport.iyr.is_some() &&
+    passport.byr.clone().map_or(false, |byr_str| 
+            byr_str.len() == 4 && BirthYear::parse(byr_str.as_str()).map_or_else(|x| panic!("byr: {}", byr_str), |byr| byr.year >= 1920 && byr.year <= 2002)) &&
     passport.iyr.clone().map_or(false, |iyr_str| 
-        iyr_str.len() == 4 && iyr_str.parse::<usize>().map(|iyr| iyr >= 2010 && iyr <= 2020).unwrap_or(false)) &&
-    passport.eyr.is_some() &&
+        iyr_str.len() == 4 && IssueYear::parse(iyr_str.as_str()).map_or(false, |iyr| iyr.year >= 2010 && iyr.year <= 2020)) &&
     passport.eyr.clone().map_or(false, |eyr_str| 
-        eyr_str.len() == 4 && eyr_str.parse::<usize>().map(|eyr| eyr >= 2020 && eyr <= 2030).unwrap_or(false)) &&
-    passport.hgt.is_some() &&
-    passport.hgt.clone().map_or(false, |hgt_str| 
-        match hgt_str {
-            s if s.ends_with("cm") => {
-                let height = s.split("c").next().unwrap().parse::<usize>().unwrap();
-                height >= 150 && height <= 193
-            },
-            s if s.ends_with("in") => {
-                let height = s.split("i").next().unwrap().parse::<usize>().unwrap();
-                height >= 59 && height <= 76
-            },
+        eyr_str.len() == 4 && ExpiryYear::parse(eyr_str.as_str()).map_or(false, |eyr| eyr.year >= 2020 && eyr.year <= 2030)) &&
+    passport.hgt.clone().map_or(false, |hgt_str| {
+        let height = Height::parse(hgt_str.as_str());
+        match height {
+            Ok(Height::Cm(cm)) => cm >= 150 && cm <= 193,
+            Ok(Height::In(inches)) => inches >= 59 && inches <= 76,
             _ => false
         }
-     ) &&
-    passport.hcl.is_some() && passport.hcl.clone().map_or(false, |hair| hair_regex.is_match(&hair)) &&
-    passport.ecl.is_some() && passport.ecl.clone().map_or(false, |eye_colour| eye_colours.contains(&eye_colour.as_str())) &&
-    passport.pid.is_some() && passport.pid.clone().map_or(false, |p| pid_regex.is_match(&p))
+    }) &&
+    passport.hcl.clone().map_or(false, |hair| HairColour::parse(hair.as_str()).is_ok()) &&
+    passport.ecl.clone().map_or(false, |eye_colour| EyeColour::parse(eye_colour.as_str()).is_ok()) &&
+    passport.pid.clone().map_or(false, |p| PID::parse(p.as_str()).is_ok())
 }
