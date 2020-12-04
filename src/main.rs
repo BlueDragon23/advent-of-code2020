@@ -1,3 +1,14 @@
 fn main() {
-    println!("Hello, world!");
+    let x = Coordinate { row: 1, col: 1};
+    println!("Hello, world! {:?}", x);
 }
+
+#[derive(Debug)]
+struct Coordinate {
+    row: usize,
+    col: usize
+}
+
+// fn navigate(coord: Coordinate, direction: ()) -> Coordinate {
+//     coord
+// }
