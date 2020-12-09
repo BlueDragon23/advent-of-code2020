@@ -10,7 +10,7 @@ struct State {
     acc: i32,
 }
 
-#[derive(Reformation)]
+#[derive(Clone, Copy, Reformation)]
 enum Instruction {
     #[reformation(r"acc {}")]
     Acc(i32),
@@ -28,38 +28,51 @@ fn main() {
         .map(|line| line.unwrap())
         .collect::<Vec<String>>();
     for change_line in 0..program.len() {
-        let new_program = match Instruction::parse(program[change_line].as_str()).unwrap() {
-            Instruction::Acc(_) => continue,
-            Instruction::Jump(x) => {
-                let mut new = program.clone();
-                new[change_line] = format!("nop {}", x);
-                new
-            }
-            Instruction::Noop(x) => {
-                let mut new = program.clone();
-                new[change_line] = format!("jmp {}", x);
-                new
-            }
+        let replacement = match get_replacement_instruction(program[change_line].as_str()) {
+            Some(instr) => instr,
+            _ => continue,
         };
-        let mut executed_lines = HashSet::new();
-        let mut state = State { line: 0, acc: 0 };
-        loop {
-            if executed_lines.contains(&state.line) || state.line >= program.len() {
-                break;
-            }
-            executed_lines.insert(state.line);
-            let function = Instruction::parse(new_program[state.line].as_str()).unwrap();
-            match function {
-                Instruction::Jump(x) => state.line = ((state.line as i32) + x) as usize,
-                Instruction::Acc(x) => {
-                    state.acc += x;
-                    state.line += 1
-                }
-                _ => state.line += 1,
-            }
-        }
+        let state = run_program(program.clone(), change_line, replacement);
         if state.line == program.len() {
             println!("{:?}", state.acc);
+            break;
         }
     }
+}
+
+fn get_replacement_instruction(line: &str) -> Option<Instruction> {
+    match Instruction::parse(line).unwrap() {
+        Instruction::Acc(_) => Option::None,
+        Instruction::Jump(x) => {
+            Some(Instruction::Noop(x))
+        }
+        Instruction::Noop(x) => {
+            Some(Instruction::Jump(x))
+        }
+    }
+}
+
+fn run_program(program: Vec<String>, change_line: usize, replacement: Instruction) -> State {
+    let mut executed_lines = HashSet::new();
+    let mut state = State { line: 0, acc: 0 };
+    loop {
+        if executed_lines.contains(&state.line) || state.line >= program.len() {
+            break;
+        }
+        executed_lines.insert(state.line);
+        let function = if state.line == change_line {
+            replacement
+        } else {
+            Instruction::parse(program[state.line].as_str()).unwrap()
+        };
+        match function {
+            Instruction::Jump(x) => state.line = ((state.line as i32) + x) as usize,
+            Instruction::Acc(x) => {
+                state.acc += x;
+                state.line += 1
+            }
+            _ => state.line += 1,
+        }
+    }
+    state
 }
