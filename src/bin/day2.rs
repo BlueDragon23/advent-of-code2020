@@ -1,14 +1,15 @@
+use regex::Regex;
 use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
-use regex::{Regex};
 
 fn main() {
     let f = File::open("input/input2_1.txt").unwrap();
     let reader = BufReader::new(f);
     let re = Regex::new(r"^(\d+)-(\d+) (.): (.+)$").unwrap();
 
-    let result: usize = reader.lines()
+    let result: usize = reader
+        .lines()
         .map(|line| line.unwrap())
         .map(|s| {
             let matches = re.captures(&s).unwrap();
@@ -17,7 +18,9 @@ fn main() {
             let c = matches.get(3).unwrap().as_str().chars().next().unwrap();
             let text = matches.get(4).unwrap().as_str();
             validation_2(lower, upper, c, text)
-        }).filter(|&b| b).count();
+        })
+        .filter(|&b| b)
+        .count();
     println!("{}", result);
 }
 

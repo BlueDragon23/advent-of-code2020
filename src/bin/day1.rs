@@ -5,7 +5,10 @@ use std::io::BufReader;
 fn main() {
     let f = File::open("input/input1_1.txt").unwrap();
     let reader = BufReader::new(f);
-    let numbers = reader.lines().map(|s| s.unwrap().parse::<i32>().unwrap()).collect::<Vec<i32>>();
+    let numbers = reader
+        .lines()
+        .map(|s| s.unwrap().parse::<i32>().unwrap())
+        .collect::<Vec<i32>>();
     for a in &numbers {
         for b in &numbers {
             for c in &numbers {
@@ -13,6 +16,6 @@ fn main() {
                     println!("a * b * c = {}", (*a * *b * *c));
                 }
             }
-        } 
+        }
     }
 }

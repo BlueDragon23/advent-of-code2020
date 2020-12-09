@@ -1,8 +1,8 @@
 #![feature(iterator_fold_self)]
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
-use std::collections::HashSet;
 
 fn main() {
     let f = File::open("input/input6_1.txt").unwrap();
@@ -10,12 +10,18 @@ fn main() {
     let mut buffer = String::new();
     reader.read_to_string(&mut buffer);
 
-    let result: usize = buffer.split("\n\n").map(|group| accumulate2(group.to_string())).sum();
+    let result: usize = buffer
+        .split("\n\n")
+        .map(|group| accumulate2(group.to_string()))
+        .sum();
     println!("{:?}", result);
 }
 
 fn accumulate1(group: String) -> usize {
-    let set = group.chars().filter(|c| !(*c == '\n')).collect::<HashSet<char>>();
+    let set = group
+        .chars()
+        .filter(|c| !(*c == '\n'))
+        .collect::<HashSet<char>>();
     set.len()
 }
 
