@@ -45,6 +45,7 @@ enum Height {
 #[reformation(r"{colour}")]
 struct HairColour {
     #[reformation(r"#([0-9]|[a-f]){6}")]
+    #[allow(dead_code)]
     colour: String,
 }
 
@@ -52,6 +53,7 @@ struct HairColour {
 #[reformation(r"{colour}")]
 struct EyeColour {
     #[reformation(r"(amb|blu|brn|gry|grn|hzl|oth)")]
+    #[allow(dead_code)]
     colour: String,
 }
 
@@ -59,6 +61,7 @@ struct EyeColour {
 #[reformation(r"{id}")]
 struct PID {
     #[reformation(r"\d{9}")]
+    #[allow(dead_code)]
     id: String,
 }
 
@@ -117,7 +120,7 @@ fn valid_fields(passport: &Passport) -> bool {
     passport.byr.clone().map_or(false, |byr_str| {
         byr_str.len() == 4
             && BirthYear::parse(byr_str.as_str()).map_or_else(
-                |x| panic!("byr: {}", byr_str),
+                |_| panic!("byr: {}", byr_str),
                 |byr| byr.year >= 1920 && byr.year <= 2002,
             )
     }) && passport.iyr.clone().map_or(false, |iyr_str| {

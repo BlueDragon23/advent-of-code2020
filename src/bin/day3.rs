@@ -6,8 +6,6 @@ fn main() {
     let f = File::open("input/input3_1.txt").unwrap();
     let reader = BufReader::new(f);
 
-    let tree = '#';
-    let empty = '.';
     let lines = reader
         .lines()
         .map(|line| line.unwrap())
@@ -22,10 +20,10 @@ fn main() {
             .map(|line| {
                 let obstacle = line.chars().cycle().nth(position.1).unwrap();
                 position = (position.0 + pattern.0, position.1 + pattern.1);
-                if obstacle == tree {
-                    1
-                } else {
-                    0
+                match obstacle {
+                    '#' => 1,
+                    '.' => 0,
+                    _ => panic!("Invalid character {}", obstacle)
                 }
             })
             .sum();

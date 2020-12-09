@@ -1,6 +1,4 @@
-use itertools::{Combinations, Itertools};
-use reformation::Reformation;
-use std::collections::HashSet;
+use itertools::{Itertools};
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;

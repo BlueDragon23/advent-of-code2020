@@ -8,13 +8,19 @@ fn main() {
     let f = File::open("input/input6_1.txt").unwrap();
     let mut reader = BufReader::new(f);
     let mut buffer = String::new();
-    reader.read_to_string(&mut buffer);
+    reader.read_to_string(&mut buffer).unwrap_or_else(|_| panic!("Failed to read"));
 
-    let result: usize = buffer
+    let part1: usize = buffer
+        .split("\n\n")
+        .map(|group| accumulate1(group.to_string()))
+        .sum();
+    println!("part 1: {:?}", part1);
+
+    let part2: usize = buffer
         .split("\n\n")
         .map(|group| accumulate2(group.to_string()))
         .sum();
-    println!("{:?}", result);
+    println!("part 2: {:?}", part2);
 }
 
 fn accumulate1(group: String) -> usize {

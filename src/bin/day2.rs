@@ -13,17 +13,18 @@ fn main() {
         .map(|line| line.unwrap())
         .map(|s| {
             let matches = re.captures(&s).unwrap();
-            let lower = matches.get(1).unwrap().as_str().parse::<usize>().unwrap();
-            let upper = matches.get(2).unwrap().as_str().parse::<usize>().unwrap();
-            let c = matches.get(3).unwrap().as_str().chars().next().unwrap();
-            let text = matches.get(4).unwrap().as_str();
-            validation_2(lower, upper, c, text)
+            let lower = matches.get(1)?.as_str().parse::<usize>().unwrap();
+            let upper = matches.get(2)?.as_str().parse::<usize>().unwrap();
+            let c = matches.get(3)?.as_str().chars().next()?;
+            let text = matches.get(4)?.as_str();
+            Option::Some(validation_2(lower, upper, c, text))
         })
-        .filter(|&b| b)
+        .filter(|&b| b.unwrap())
         .count();
     println!("{}", result);
 }
 
+#[allow(dead_code)]
 fn validation_1(lower: usize, upper: usize, c: char, text: &str) -> bool {
     let count = text.chars().filter(|&letter| letter == c).count();
     count >= lower && count <= upper
