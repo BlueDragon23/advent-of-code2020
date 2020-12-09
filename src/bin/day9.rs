@@ -11,18 +11,20 @@ fn main() {
     let mut lower = 0;
     let mut upper = 1;
     let target = 90433990;
+    let mut sum: i64 = numbers[0] + numbers[1];
     loop {
-        let sum: i64 = numbers.clone().into_iter().skip(lower).take(upper - lower).sum();
         if sum == target {
             break
         } else if sum > target {
+            sum -= numbers[lower];
             lower += 1;
         } else {
             upper += 1;
+            sum += numbers[upper];
         }
     }
-    let min = numbers.clone().into_iter().skip(lower).take(upper - lower).min().unwrap();
-    let max = numbers.clone().into_iter().skip(lower).take(upper - lower).max().unwrap();
+    let min = numbers.clone().into_iter().skip(lower).take(upper - lower + 1).min().unwrap();
+    let max = numbers.clone().into_iter().skip(lower).take(upper - lower + 1).max().unwrap();
     println!("{}, {}, {}", lower, upper, min + max);
 }
 
