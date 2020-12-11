@@ -16,27 +16,24 @@ fn main() {
         .lines()
         .map(|line| parse(line.unwrap().as_str()))
         .collect::<Vec<_>>();
-    let mut board = parsed;
-    let mut iterations = 0;
-    let final_state = loop {
-        let new_board = transform2(board.clone());
+    let mut board = parsed.clone();
+    let final_state_1 = loop {
+        let new_board = transform(&board);
         if new_board == board {
             break board;
         }
         board = new_board;
-        // println!("{:?}", board);
-        // println!("{}", board.iter().fold("".to_string(), |acc, row| acc + row.iter().fold("", |a, col| {
-        //     a.to_string().push(match col {
-        //     State::Seat => 'L',
-        //     State::Floor => '.',
-        //     State::Occupied => '#'
-        // }); a}) + "\n"));
-        iterations += 1;
-        if iterations % 10 == 0 {
-            println!("{}", iterations);
-        }
     };
-    println!("{}", final_state.iter().map(|row| row.iter().filter(|&&x| x == State::Occupied).count()).sum::<usize>());
+    println!("part 1: {}", final_state_1.iter().map(|row| row.iter().filter(|&&x| x == State::Occupied).count()).sum::<usize>());
+    let mut board = parsed;
+    let final_state = loop {
+        let new_board = transform2(&board);
+        if new_board == board {
+            break board;
+        }
+        board = new_board;
+    };
+    println!("part 2: {}", final_state.iter().map(|row| row.iter().filter(|&&x| x == State::Occupied).count()).sum::<usize>());
 }
 
 fn parse(line: &str) -> Vec<State> {
@@ -48,17 +45,17 @@ fn parse(line: &str) -> Vec<State> {
     }).collect()
 }
 
-fn transform2(board: Vec<Vec<State>>) -> Vec<Vec<State>> {
+fn transform2(board: &Vec<Vec<State>>) -> Vec<Vec<State>> {
     let mut new_board = board.clone();
     for (r, row) in board.iter().enumerate() {
         for (c, &col) in row.iter().enumerate() {
             let new_state = match col {
-                State::Seat => if check_surrounds_empty2(board.clone(), r, c) {
+                State::Seat => if check_surrounds_empty2(board, r, c) {
                     State::Occupied
                 } else {
                     State::Seat
                 },
-                State::Occupied => if check_surrounds_full2(board.clone(), r, c) {
+                State::Occupied => if check_surrounds_full2(board, r, c) {
                     State::Seat
                 } else {
                     State::Occupied
@@ -71,7 +68,7 @@ fn transform2(board: Vec<Vec<State>>) -> Vec<Vec<State>> {
     new_board
 }
 
-fn find_next_seat(board: Vec<Vec<State>>, r: usize, c: usize, direction: (i32, i32)) -> Option<State> {
+fn find_next_seat(board: &Vec<Vec<State>>, r: usize, c: usize, direction: (i32, i32)) -> Option<State> {
     let mut position = (r as i32 + direction.0, c as i32 + direction.1);
     while position.0 >=0 && position.1 >= 0 && (position.0 as usize) < board.len() && (position.1 as usize) < board[0].len() {
         let state = board[position.0 as usize][position.1 as usize];
@@ -83,10 +80,10 @@ fn find_next_seat(board: Vec<Vec<State>>, r: usize, c: usize, direction: (i32, i
     Option::None
 }
 
-fn check_surrounds_empty2(board: Vec<Vec<State>>, r: usize, c: usize) -> bool {
+fn check_surrounds_empty2(board: &Vec<Vec<State>>, r: usize, c: usize) -> bool {
     let directions: Vec<(i32, i32)> = vec![(-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)];
     for direction in directions {
-        let option_next = find_next_seat(board.clone(), r, c, direction);
+        let option_next = find_next_seat(board, r, c, direction);
         if option_next.is_none() {
             continue;
         }
@@ -97,11 +94,11 @@ fn check_surrounds_empty2(board: Vec<Vec<State>>, r: usize, c: usize) -> bool {
     true
 }
 
-fn check_surrounds_full2(board: Vec<Vec<State>>, r: usize, c: usize) -> bool {
+fn check_surrounds_full2(board: &Vec<Vec<State>>, r: usize, c: usize) -> bool {
     let directions: Vec<(i32, i32)> = vec![(-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)];
     let mut count = 0;
     for direction in directions {
-        let option_next = find_next_seat(board.clone(), r, c, direction);
+        let option_next = find_next_seat(board, r, c, direction);
         if option_next.is_none() {
             continue;
         }
@@ -114,17 +111,17 @@ fn check_surrounds_full2(board: Vec<Vec<State>>, r: usize, c: usize) -> bool {
     count >= 5
 }
 
-fn transform(board: Vec<Vec<State>>) -> Vec<Vec<State>> {
+fn transform(board: &Vec<Vec<State>>) -> Vec<Vec<State>> {
     let mut new_board = board.clone();
     for (r, row) in board.iter().enumerate() {
         for (c, &col) in row.iter().enumerate() {
             let new_state = match col {
-                State::Seat => if check_surrounds_empty(board.clone(), r, c) {
+                State::Seat => if check_surrounds_empty(board, r, c) {
                     State::Occupied
                 } else {
                     State::Seat
                 },
-                State::Occupied => if check_surrounds_full(board.clone(), r, c) {
+                State::Occupied => if check_surrounds_full(board, r, c) {
                     State::Seat
                 } else {
                     State::Occupied
@@ -137,7 +134,7 @@ fn transform(board: Vec<Vec<State>>) -> Vec<Vec<State>> {
     new_board
 }
 
-fn check_surrounds_empty(board: Vec<Vec<State>>, r: usize, c: usize) -> bool {
+fn check_surrounds_empty(board: &Vec<Vec<State>>, r: usize, c: usize) -> bool {
     let directions: Vec<(i32, i32)> = vec![(-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)];
     for direction in directions {
         let (r_, c_) = (r as i32 + direction.0, c as i32 + direction.1);
@@ -151,7 +148,7 @@ fn check_surrounds_empty(board: Vec<Vec<State>>, r: usize, c: usize) -> bool {
     true
 }
 
-fn check_surrounds_full(board: Vec<Vec<State>>, r: usize, c: usize) -> bool {
+fn check_surrounds_full(board: &Vec<Vec<State>>, r: usize, c: usize) -> bool {
     let directions: Vec<(i32, i32)> = vec![(-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)];
     let mut count = 0;
     for direction in directions {
@@ -160,10 +157,8 @@ fn check_surrounds_full(board: Vec<Vec<State>>, r: usize, c: usize) -> bool {
             continue
         }
         if board[r_ as usize][c_ as usize] == State::Occupied {
-            // println!("{}, {}", r, c);
             count += 1;
         }
     }
-    // println!("{}, {}, {}", r, c, count);
     count >= 4
 }
