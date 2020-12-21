@@ -4,6 +4,7 @@ use std::io::BufReader;
 use itertools::Itertools;
 use regex::Regex;
 use std::collections::HashMap;
+use std::time;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum State {
@@ -20,6 +21,7 @@ struct Coord {
 }
 
 fn main() {
+    let start_time = time::Instant::now();
     let f = File::open("input/input17_1.txt").unwrap();
     let reader = BufReader::new(f);
     let mut world = reader
@@ -44,7 +46,8 @@ fn main() {
         //     .collect::<Vec<_>>())
     }
     println!("part 2: {}", world.values().filter(|&&s| s == State::On).count());
-    
+    let end_time = time::Instant::now();
+    println!("Took {}ms", (end_time - start_time).as_millis());
 }
 
 fn update(world: &HashMap<Coord, State>) -> HashMap<Coord, State> {
