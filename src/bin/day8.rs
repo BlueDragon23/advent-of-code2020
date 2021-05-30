@@ -43,12 +43,8 @@ fn main() {
 fn get_replacement_instruction(line: &str) -> Option<Instruction> {
     match Instruction::parse(line).unwrap() {
         Instruction::Acc(_) => Option::None,
-        Instruction::Jump(x) => {
-            Some(Instruction::Noop(x))
-        }
-        Instruction::Noop(x) => {
-            Some(Instruction::Jump(x))
-        }
+        Instruction::Jump(x) => Some(Instruction::Noop(x)),
+        Instruction::Noop(x) => Some(Instruction::Jump(x)),
     }
 }
 

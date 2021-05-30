@@ -1,4 +1,3 @@
-#![feature(iterator_fold_self)]
 use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
@@ -8,7 +7,9 @@ fn main() {
     let f = File::open("input/input6_1.txt").unwrap();
     let mut reader = BufReader::new(f);
     let mut buffer = String::new();
-    reader.read_to_string(&mut buffer).unwrap_or_else(|_| panic!("Failed to read"));
+    reader
+        .read_to_string(&mut buffer)
+        .unwrap_or_else(|_| panic!("Failed to read"));
 
     let part1: usize = buffer
         .split("\n\n")
@@ -35,7 +36,7 @@ fn accumulate2(group: String) -> usize {
     group
         .lines()
         .map(|line| line.chars().collect::<HashSet<char>>())
-        .fold_first(|a, b| a.intersection(&b).map(|c| *c).collect::<HashSet<char>>())
+        .reduce(|a, b| a.intersection(&b).map(|c| *c).collect::<HashSet<char>>())
         .unwrap_or(HashSet::new())
         .len()
 }

@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 fn main() {
-    let mut numbers = vec![7,12,1,0,16,2];
+    let mut numbers = vec![7, 12, 1, 0, 16, 2];
     let stop_value = 30000000;
     let iterator = numbers.len()..stop_value;
-    let mut indices= numbers
+    let mut indices = numbers
         .clone()
         .into_iter()
         .enumerate()
@@ -26,5 +26,4 @@ fn main() {
     });
     println!("{}", numbers[2020 - 1]);
     println!("{}", numbers[30000000 - 1]);
-
 }

@@ -1,15 +1,14 @@
-use std::{fs::File};
+use itertools::Itertools;
+use std::collections::HashMap;
+use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
-use itertools::Itertools;
-use regex::Regex;
-use std::collections::HashMap;
 use std::time;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum State {
     On,
-    Off
+    Off,
 }
 
 #[derive(Eq, PartialEq, Hash, Debug, Clone, Copy)]
@@ -17,7 +16,7 @@ struct Coord {
     x: i32,
     y: i32,
     z: i32,
-    w: i32
+    w: i32,
 }
 
 fn main() {
@@ -29,12 +28,17 @@ fn main() {
         .map(|line| parse(line.unwrap().as_str()))
         .enumerate()
         .fold(HashMap::new(), |mut m, (row, line)| {
-            line
-                .iter()
-                .enumerate()
-                .for_each(|(col, &s)| {
-                    m.insert(Coord {x: col as i32, y: row as i32, z: 0, w: 0}, s);
-                });
+            line.iter().enumerate().for_each(|(col, &s)| {
+                m.insert(
+                    Coord {
+                        x: col as i32,
+                        y: row as i32,
+                        z: 0,
+                        w: 0,
+                    },
+                    s,
+                );
+            });
             m
         });
     for _ in 0..6 {
@@ -45,7 +49,10 @@ fn main() {
         //     .map(|(coord, s)| format!("{:?}: {:?}", coord, s))
         //     .collect::<Vec<_>>())
     }
-    println!("part 2: {}", world.values().filter(|&&s| s == State::On).count());
+    println!(
+        "part 2: {}",
+        world.values().filter(|&&s| s == State::On).count()
+    );
     let end_time = time::Instant::now();
     println!("Took {}ms", (end_time - start_time).as_millis());
 }
@@ -64,11 +71,11 @@ fn update(world: &HashMap<Coord, State>) -> HashMap<Coord, State> {
         for y in (min_y - 1)..(max_y + 2) {
             for z in (min_z - 1)..(max_z + 2) {
                 for w in (min_w - 1)..(max_w + 2) {
-                    let coord = Coord {x, y, z, w};
+                    let coord = Coord { x, y, z, w };
                     let current_state = *get_state(world, coord);
                     let next_state = get_new_state(world, coord);
                     if current_state == State::Off && next_state == State::Off {
-                        continue
+                        continue;
                     }
                     new_world.insert(coord, next_state);
                 }
@@ -89,7 +96,7 @@ fn get_new_state(world: &HashMap<Coord, State>, coord: Coord) -> State {
             } else {
                 State::Off
             }
-        },
+        }
         State::Off => {
             if surrounding_active == 3 {
                 State::On
@@ -102,7 +109,7 @@ fn get_new_state(world: &HashMap<Coord, State>, coord: Coord) -> State {
 
 fn get_surrounding_active(world: &HashMap<Coord, State>, coord: Coord) -> i32 {
     let mutations: Vec<i32> = vec![-1, 0, 1];
-    
+
     let directions: Vec<(i32, i32, i32, i32)> = mutations
         .iter()
         .cartesian_product(mutations.iter())
@@ -116,11 +123,11 @@ fn get_surrounding_active(world: &HashMap<Coord, State>, coord: Coord) -> i32 {
             x: coord.x + delta.0,
             y: coord.y + delta.1,
             z: coord.z + delta.2,
-            w: coord.w + delta.3
+            w: coord.w + delta.3,
         };
         match get_state(world, check_coord) {
             State::On => acc + 1,
-            State::Off => acc
+            State::Off => acc,
         }
     })
 }
@@ -130,11 +137,11 @@ fn get_state(world: &HashMap<Coord, State>, coord: Coord) -> &State {
 }
 
 fn parse(line: &str) -> Vec<State> {
-    line.chars().map(|c| {
-        match c {
+    line.chars()
+        .map(|c| match c {
             '.' => State::Off,
             '#' => State::On,
-            _ => panic!("")
-        }
-    }).collect()
+            _ => panic!(""),
+        })
+        .collect()
 }

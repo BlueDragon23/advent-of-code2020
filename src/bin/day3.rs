@@ -23,7 +23,7 @@ fn main() {
                 match obstacle {
                     '#' => 1,
                     '.' => 0,
-                    _ => panic!("Invalid character {}", obstacle)
+                    _ => panic!("Invalid character {}", obstacle),
                 }
             })
             .sum();

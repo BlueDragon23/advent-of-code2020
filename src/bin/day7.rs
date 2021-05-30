@@ -1,4 +1,3 @@
-use petgraph::dot::{Config, Dot};
 use petgraph::graph::{DiGraph, NodeIndex};
 use petgraph::prelude::Bfs;
 use petgraph::Graph;
@@ -54,6 +53,7 @@ fn main() {
     println!("{}", sum);
 }
 
+#[allow(dead_code)]
 fn part1(graph: Graph<Node, usize>) -> i32 {
     // This is not my original part 1, the graph edges need to be reversed. CBF right now
     let index = graph

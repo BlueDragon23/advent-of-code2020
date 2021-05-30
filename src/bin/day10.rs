@@ -1,7 +1,7 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
-use std::collections::HashMap;
 
 fn main() {
     let f = File::open("input/input10_1.txt").unwrap();
@@ -37,7 +37,11 @@ fn part1(parsed: Vec<u128>) -> usize {
     one_count * three_count
 }
 
-fn part2_recursive(parsed: Vec<u128>, index: usize, cache: &mut HashMap<usize, u128>) -> (u128, &HashMap<usize, u128>) {
+fn part2_recursive(
+    parsed: Vec<u128>,
+    index: usize,
+    cache: &mut HashMap<usize, u128>,
+) -> (u128, &HashMap<usize, u128>) {
     let maybe_result = cache.get(&index);
     if maybe_result.is_some() {
         return (*maybe_result.unwrap(), cache);
