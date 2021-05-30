@@ -18,7 +18,6 @@ fn main() {
         .with_level(LevelFilter::Error)
         .init()
         .unwrap();
-    // Different input for part 1 + part 2
     let f = File::open("input/input21_1.txt").unwrap();
     let reader = BufReader::new(f);
     let foods = reader
@@ -34,8 +33,7 @@ fn main() {
     // If an ingredient has more than one allergen, check other ingredients
 
     // Plan: for each food, for each ingredient, add all allergens to impossibilities. O(nm)
-    // Alternate plan: For each food, add ingredient allergen entry O(n)
-    let (possibilities, impossibilities): (
+    let (possibilities, _): (
         HashMap<String, HashSet<String>>,
         HashMap<String, HashSet<String>>,
     ) = foods.clone().into_iter().fold(
@@ -47,18 +45,27 @@ fn main() {
     println!("{:?}", count_appearances(&possibilities, &foods.clone()));
     // Evaluate manually, there's 8 choices
     // mfp,mgvfmvp,nhdjth,hcdchl,dvkbjh,dcvrf,bcjz,mhnrqpg is the solution
-    println!("{:?}", possibilities.into_iter().filter(|(_, values)| values.len() > 0).collect::<HashMap<String, HashSet<String>>>());
+    println!(
+        "{:?}",
+        possibilities
+            .into_iter()
+            .filter(|(_, values)| values.len() > 0)
+            .collect::<HashMap<String, HashSet<String>>>()
+    );
 }
 
 fn count_appearances(possibilities: &HashMap<String, HashSet<String>>, foods: &Vec<Food>) -> u32 {
     possibilities
         .into_iter()
-        .filter(|(_, values)| {
-            values.len() == 0
-        })
+        .filter(|(_, values)| values.len() == 0)
         .fold(0, |acc, (ingredient, _)| {
             acc + foods.into_iter().fold(0, |i_count, food| {
-                i_count + if food.ingredients.contains(ingredient) { 1 } else { 0 }
+                i_count
+                    + if food.ingredients.contains(ingredient) {
+                        1
+                    } else {
+                        0
+                    }
             })
         })
 }
@@ -68,7 +75,10 @@ fn update_possibilities(
     ingredients: &HashSet<String>,
     mut possibilities: HashMap<String, HashSet<String>>,
     mut impossibilities: HashMap<String, HashSet<String>>,
-) -> (HashMap<String, HashSet<String>>, HashMap<String, HashSet<String>>) {
+) -> (
+    HashMap<String, HashSet<String>>,
+    HashMap<String, HashSet<String>>,
+) {
     ingredients.into_iter().for_each(|ingredient| {
         if food.ingredients.contains(ingredient) {
             // Add to possibilities if not in impossibilities
